@@ -1,4 +1,4 @@
-// internal/ai/suggest.go
+// internal/ai/openai.go
 package ai
 
 import (
@@ -10,6 +10,18 @@ import (
 )
 
 const openaiURL = "https://api.openai.com/v1/chat/completions"
+
+type OpenAIProvider struct {
+	apiKey string
+	model  string
+}
+
+func NewOpenAIProvider(apiKey, model string) *OpenAIProvider {
+	return &OpenAIProvider{
+		apiKey: apiKey,
+		model:  model,
+	}
+}
 
 type OpenAIRequest struct {
 	Model    string        `json:"model"`
@@ -29,14 +41,13 @@ type OpenAIResponse struct {
 	} `json:"choices"`
 }
 
-// SuggestCommitMessage generates a commit message based on the diff
-func SuggestCommitMessage(apiKey, diff, model string) (string, error) {
+func (p *OpenAIProvider) SuggestCommitMessage(diff string) (string, error) {
 	if diff == "" {
 		return "", fmt.Errorf("no diff provided")
 	}
 
 	requestBody := OpenAIRequest{
-		Model: model,
+		Model: p.model,
 		Messages: []ChatMessage{
 			{
 				Role:    "system",
@@ -60,7 +71,7 @@ func SuggestCommitMessage(apiKey, diff, model string) (string, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Authorization", "Bearer "+p.apiKey)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

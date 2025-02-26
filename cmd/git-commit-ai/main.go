@@ -22,26 +22,69 @@ func main() {
 	case "config":
 		if len(os.Args) < 3 {
 			fmt.Println("Error: Missing subcommand for config")
-			printUsage()
+			printConfigUsage()
 			return
 		}
 
-		if os.Args[2] == "set-api-key" {
+		switch os.Args[2] {
+		case "set-openai-key":
 			if len(os.Args) < 4 {
 				fmt.Println("Error: API key required")
-				printUsage()
+				printConfigUsage()
 				return
 			}
 
-			if err := config.SaveAPIKey(os.Args[3]); err != nil {
-				fmt.Printf("Error saving API key: %v\n", err)
+			if err := config.SaveAPIKey(config.ProviderOpenAI, os.Args[3]); err != nil {
+				fmt.Printf("Error saving OpenAI API key: %v\n", err)
 				return
 			}
 
-			fmt.Println("API key saved successfully!")
-		} else {
+			fmt.Println("OpenAI API key saved successfully!")
+
+		case "set-claude-key":
+			if len(os.Args) < 4 {
+				fmt.Println("Error: API key required")
+				printConfigUsage()
+				return
+			}
+
+			if err := config.SaveAPIKey(config.ProviderClaude, os.Args[3]); err != nil {
+				fmt.Printf("Error saving Claude API key: %v\n", err)
+				return
+			}
+
+			fmt.Println("Claude API key saved successfully!")
+
+		case "use-provider":
+			if len(os.Args) < 4 {
+				fmt.Println("Error: Provider name required")
+				printConfigUsage()
+				return
+			}
+
+			providerName := os.Args[3]
+			var provider config.AIProvider
+
+			switch providerName {
+			case "openai":
+				provider = config.ProviderOpenAI
+			case "claude":
+				provider = config.ProviderClaude
+			default:
+				fmt.Printf("Error: Unknown provider '%s'. Use 'openai' or 'claude'.\n", providerName)
+				return
+			}
+
+			if err := config.SetActiveProvider(provider); err != nil {
+				fmt.Printf("Error setting active provider: %v\n", err)
+				return
+			}
+
+			fmt.Printf("Now using %s as the active provider.\n", providerName)
+
+		default:
 			fmt.Printf("Unknown config command: %s\n", os.Args[2])
-			printUsage()
+			printConfigUsage()
 		}
 
 	case "suggest":
@@ -58,8 +101,16 @@ func main() {
 func printUsage() {
 	fmt.Println("Git Commit AI Assistant")
 	fmt.Println("Usage:")
-	fmt.Println("  git-commit-ai config set-api-key YOUR_API_KEY   - Set your OpenAI API key")
-	fmt.Println("  git-commit-ai suggest                           - Get a commit suggestion for staged changes")
+	fmt.Println("  git-commit-ai config [subcommand]            - Configure the assistant")
+	fmt.Println("  git-commit-ai suggest                        - Get a commit suggestion for staged changes")
+	fmt.Println("\nRun 'git-commit-ai config' to see configuration options.")
+}
+
+func printConfigUsage() {
+	fmt.Println("Configuration Commands:")
+	fmt.Println("  git-commit-ai config set-openai-key KEY      - Set your OpenAI API key")
+	fmt.Println("  git-commit-ai config set-claude-key KEY      - Set your Claude API key")
+	fmt.Println("  git-commit-ai config use-provider PROVIDER   - Set active provider (openai or claude)")
 }
 
 func suggestCommit() error {
@@ -67,10 +118,6 @@ func suggestCommit() error {
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("error loading config: %w", err)
-	}
-
-	if cfg.OpenAIAPIKey == "" {
-		return fmt.Errorf("API key not set. Please run: git-commit-ai config set-api-key YOUR_API_KEY")
 	}
 
 	// Get diff
@@ -83,10 +130,19 @@ func suggestCommit() error {
 		return fmt.Errorf("no staged changes found. Add files with 'git add' first")
 	}
 
-	fmt.Println("Getting commit suggestion based on diff...")
+	// Create AI provider
+	provider, err := ai.NewProvider(cfg)
+	if err != nil {
+		if strings.Contains(err.Error(), "API key not set") {
+			return fmt.Errorf("%v. Please run appropriate config command to set API key", err)
+		}
+		return fmt.Errorf("error initializing AI provider: %w", err)
+	}
+
+	fmt.Printf("Getting commit suggestion using %s...\n", cfg.ActiveProvider)
 
 	// Get suggestion
-	suggestion, err := ai.SuggestCommitMessage(cfg.OpenAIAPIKey, diff, cfg.Model)
+	suggestion, err := provider.SuggestCommitMessage(diff)
 	if err != nil {
 		return fmt.Errorf("error getting suggestion: %w", err)
 	}
