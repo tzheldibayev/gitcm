@@ -79,33 +79,7 @@ gitcm suggest
 
 # Review the suggested message and confirm
 # Your commit is created!
-
-## Shell Integration
-
-For easier usage, consider adding this function to your `.bashrc` or `.zshrc`:
-
-```bash
-gcm() {
- suggestion=$(gitcm suggest-plain)
- if [ -n "$suggestion" ]; then
-   echo "Suggested message: $suggestion"
-   read "response?Use this message? (y/n/e to edit): "
-   
-   case "$response" in
-     y|Y) git commit -m "$suggestion" ;;
-     e|E) 
-       read "message?Edit message: " -e -i "$suggestion"
-       git commit -m "$message" 
-       ;;
-     *) git commit ;;
-   esac
- else
-   echo "No suggestion available."
-   git commit
- fi
-}
-
-After adding this, you can simply use `gcm` to get AI-powered commit suggestions.
+```
 
 ## Command Reference
 
@@ -116,7 +90,7 @@ After adding this, you can simply use `gcm` to get AI-powered commit suggestions
 - `gitcm suggest-plain` - Get just the suggestion text (for scripting)
 
 ## Example Output
-
+```bash
 $ gitcm suggest
 
 Getting commit suggestion using openai...
@@ -126,7 +100,7 @@ Suggested commit message:
 
 Use this message? (y/n): y
 Commit completed!
-
+```
 ## License
 
 MIT
