@@ -1,3 +1,3 @@
-module github.com/tzheldibayev/git-commit-ai
+module github.com/tzheldibayev/gitcm
 
 go 1.23.3

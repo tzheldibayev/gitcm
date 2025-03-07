@@ -4,7 +4,7 @@ package ai
 import (
 	"fmt"
 
-	"github.com/tzheldibayev/git-commit-ai/internal/config"
+	"github.com/tzheldibayev/gitcm/internal/config"
 )
 
 // Provider defines the interface for AI providers

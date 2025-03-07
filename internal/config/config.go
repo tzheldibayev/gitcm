@@ -115,7 +115,7 @@ func getConfigDir() (string, error) {
 		return "", fmt.Errorf("could not find home directory: %w", err)
 	}
 
-	configDir := filepath.Join(home, ".config", "git-commit-ai")
+	configDir := filepath.Join(home, ".config", "gitcm")
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return "", fmt.Errorf("could not create config directory: %w", err)
 	}
