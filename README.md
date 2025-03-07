@@ -20,7 +20,6 @@
 
 ### Install from source
 
-```bash
 # Clone the repository
 git clone https://github.com/tzheldibayev/gitcm.git
 cd gitcm
@@ -39,19 +38,20 @@ Before using `gitcm`, you need to set up your API keys:
 
 ```bash
 gitcm config set-openai-key YOUR_OPENAI_API_KEY
+```
 
 ### Claude configuration
 
 ```bash
 gitcm config set-claude-key YOUR_CLAUDE_API_KEY
-
+```
 ### Select which provider to use
 
 ```bash
 gitcm config use-provider openai  # Use OpenAI (default)
 # OR
 gitcm config use-provider claude  # Use Claude
-
+```
 ## Usage
 
 ### Get a commit suggestion
@@ -61,7 +61,7 @@ gitcm config use-provider claude  # Use Claude
 
 ```bash
 gitcm suggest
-
+```
 This will:
 - Analyze your staged changes
 - Generate a commit message suggestion
