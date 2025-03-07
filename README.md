@@ -87,7 +87,6 @@ gitcm suggest
 - `gitcm config set-claude-key KEY` - Set your Claude API key  
 - `gitcm config use-provider PROVIDER` - Set active provider (openai or claude)
 - `gitcm suggest` - Get a commit suggestion for staged changes
-- `gitcm suggest-plain` - Get just the suggestion text (for scripting)
 
 ## Example Output
 ```bash
